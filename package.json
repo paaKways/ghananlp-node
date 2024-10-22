@@ -1,11 +1,11 @@
 {
   "name": "@paakways/ghananlp-node",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "A simple GhanaNLP API wrapper written in Typescript",
   "main": "dist/index.js",
   "scripts": {
-    "build":"tsc",
-    "format":"prettier --write \"src/**/*.ts\"",
+    "build": "tsc",
+    "format": "prettier --write \"src/**/*.ts\"",
     "lint": "tslint -p tsconfig.json",
     "prepare": "npm run build",
     "prepublishOnly": "npm run lint",
