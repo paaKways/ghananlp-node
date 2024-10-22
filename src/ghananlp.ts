@@ -18,9 +18,7 @@ export class GhanaNLP {
         this.ttsClient = this.createClient(`tts/${options.ttsVersion}`, {
             'Content-Type': 'application/json',
         })
-        this.asrClient = this.createClient(`asr/${options.asrVersion}`, {
-            'Content-Type': 'multipart/form-data',
-        })
+        this.asrClient = this.createClient(`asr/${options.asrVersion}`)
     }
 
     private createClient(basePath: string, headers: object = {}): AxiosInstance {
@@ -43,8 +41,10 @@ export class GhanaNLP {
             throw new Error('Input text length exceeds 1000 characters');
         }
 
+        const apiRequest = { in: request.in, lang: `${request.fromLanguage}-${request.toLanguage}` }
+
         try {
-            const response = await this.translationClient.post<string>(`/translate`, request);
+            const response = await this.translationClient.post<string>(`/translate`, apiRequest);
             return { translatedText: response.data };
         } catch (error: any) {
             this.handleError(error);
@@ -85,10 +85,17 @@ export class GhanaNLP {
      */
     async transcribeAudio(request: SpeechToTextRequest): Promise<SpeechToTextResponse> {
         try {
-            const formData = new FormData();
-            formData.append('file', new Blob([request.audioFile], { type: 'audio/mpeg' }));
+            const buffer = Buffer.isBuffer(request.audioFile)
+                ? request.audioFile
+                : Buffer.from(request.audioFile);
 
-            const response = await this.asrClient.post<string>(`/transcribe?language=${request.language}`, formData, {});
+            const response = await this.asrClient.post<string>(`/transcribe`, buffer, {
+                headers: {
+                    'Content-Type': 'audio/mpeg',
+                },
+                params: { language: request.language }
+            });
+
             return { transcribedText: response.data };
         } catch (error: any) {
             this.handleError(error)
